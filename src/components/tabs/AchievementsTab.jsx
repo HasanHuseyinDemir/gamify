@@ -8,8 +8,8 @@ export default function AchievementsTab(props) {
     achievementPrestige, setAchievementPrestige, addAchievement, filteredAchievementsList, 
     editAchievementId, setEditAchievementId, editAchievementName, setEditAchievementName, 
     editAchievementDesc, setEditAchievementDesc, editAchievementCriteria, setEditAchievementCriteria,
-    editAchievementPrestige, setEditAchievementPrestige, startEditAchievement,
-    saveEditAchievement, deleteAchievement, getUserPoints, prestigeSettings
+    editAchievementPrestige, setEditAchievementPrestige,
+    deleteAchievement, getUserPoints, prestigeSettings
   } = props
 
   // Sayfalama

@@ -459,45 +459,7 @@ export default function TodoTab(props) {
         </p>
       </div>
 
-      {/* İstatistik Kartları */}
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
-        <div class="bg-white rounded-lg p-3 md:p-4 shadow-md border-l-4 border-blue-500">
-          <div class="flex items-center gap-2 md:gap-3">
-            <div class="text-xl md:text-2xl">📋</div>
-            <div class="min-w-0 flex-1">
-              <div class="text-xs md:text-sm text-gray-600 truncate">Toplam</div>
-              <div class="text-lg md:text-xl font-bold text-blue-600 truncate">{taskStats().total}</div>
-            </div>
-          </div>
-        </div>
-        <div class="bg-white rounded-lg p-3 md:p-4 shadow-md border-l-4 border-green-500">
-          <div class="flex items-center gap-2 md:gap-3">
-            <div class="text-xl md:text-2xl">✅</div>
-            <div class="min-w-0 flex-1">
-              <div class="text-xs md:text-sm text-gray-600 truncate">Tamamlanan</div>
-              <div class="text-lg md:text-xl font-bold text-green-600 truncate">{taskStats().completed}</div>
-            </div>
-          </div>
-        </div>
-        <div class="bg-white rounded-lg p-3 md:p-4 shadow-md border-l-4 border-yellow-500">
-          <div class="flex items-center gap-2 md:gap-3">
-            <div class="text-xl md:text-2xl">⏳</div>
-            <div class="min-w-0 flex-1">
-              <div class="text-xs md:text-sm text-gray-600 truncate">Bekleyen</div>
-              <div class="text-lg md:text-xl font-bold text-yellow-600 truncate">{taskStats().pending}</div>
-            </div>
-          </div>
-        </div>
-        <div class="bg-white rounded-lg p-3 md:p-4 shadow-md border-l-4 border-red-500">
-          <div class="flex items-center gap-2 md:gap-3">
-            <div class="text-xl md:text-2xl">⚠️</div>
-            <div class="min-w-0 flex-1">
-              <div class="text-xs md:text-sm text-gray-600 truncate">Geciken</div>
-              <div class="text-lg md:text-xl font-bold text-red-600 truncate">{taskStats().overdue}</div>
-            </div>
-          </div>
-        </div>
-      </div>
+
 
       {/* Görev Ekleme Formu */}
       <div class="bg-gradient-to-br from-purple-50 to-blue-50 rounded-xl p-4 md:p-6 border border-purple-200 shadow-lg">

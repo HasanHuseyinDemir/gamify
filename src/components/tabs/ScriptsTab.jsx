@@ -262,14 +262,8 @@ export default function ScriptsTab(props) {
 
           {/* Editör Tab */}
           <Show when={activeTab() === 'editor'}>
-            <Show when={isEditing()} fallback={
-              <div class="bg-gray-50 rounded-lg p-8 text-center text-gray-500">
-                <div class="text-4xl mb-4">✨</div>
-                <p class="text-lg">Script seçin veya yeni oluşturun</p>
-                <p class="text-sm mt-2">Sol taraftan bir script seçerek düzenlemeye başlayın</p>
-              </div>
-            }>
-            <div class="bg-white rounded-lg shadow-md p-6">
+            {isEditing() ? (
+              <div class="bg-white rounded-lg shadow-md p-6">
               <div class="flex justify-between items-center mb-4">
                 <h2 class="text-lg font-bold text-gray-800">
                   {activeScript() ? '✏️ Script Düzenle' : '➕ Yeni Script'}
@@ -392,6 +386,13 @@ export default function ScriptsTab(props) {
                 </Show>
               </div>
             </div>
+            ) : (
+              <div class="bg-gray-50 rounded-lg p-8 text-center text-gray-500">
+                <div class="text-4xl mb-4">✨</div>
+                <p class="text-lg">Script seçin veya yeni oluşturun</p>
+                <p class="text-sm mt-2">Sol taraftan bir script seçarak düzenlemeye başlayın</p>
+              </div>
+            )}
           </Show>
 
           {/* Şablonlar Tab */}

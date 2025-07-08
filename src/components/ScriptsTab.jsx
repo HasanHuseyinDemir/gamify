@@ -228,202 +228,6 @@ if (context.event === 'onTaskComplete') {
     }
   ]
   
-  // Belirli itemlerde milestone bonusları
-  if (itemName === 'altın' && total >= 100) {
-    x.achievements.unlock('altin_koleksiyoncusu', 'İlk 100 altına ulaştın!');
-    x.ui.notify('🏆 Altın Koleksiyoncusu başarısı açıldı!');
-  }
-  
-  if (itemName === 'elmas' && total >= 10) {
-    x.achievements.unlock('elmas_avcisi', 'İlk 10 elmasına ulaştın!');
-    x.inventory.addItem('özel_sandık', 1);
-    x.ui.notify('💎 Elmas Avcısı! Özel sandık kazandın!');
-  }
-  
-  // Genel toplama bonusu
-  if (total % 50 === 0) {
-    x.ui.notify(\`🎯 \${itemName} milestone: \${total} adet!\`);
-    x.inventory.addItem('milestone_bonusu', 1);
-  }
-}`
-    },
-    {
-      name: "Task Achievement Engine",
-      description: "Görev bazlı başarı sistemi",
-      code: `// Görev eventlerini dinle
-if (context.event === 'onTaskComplete') {
-  const completedTask = task;
-  
-  // Kategori bazlı başarılar
-  const categoryCount = x.tasks.getAllTasks()
-    .filter(t => t.completed && t.category === completedTask.category).length;
-    
-  if (categoryCount === 5) {
-    x.achievements.unlock(completedTask.category + '_novice', \`\${completedTask.category} kategorisinde 5 görev tamamladın!\`);
-  } else if (categoryCount === 25) {
-    x.achievements.unlock(completedTask.category + '_expert', \`\${completedTask.category} kategorisinde 25 görev tamamladın!\`);
-    x.inventory.addItem('uzman_rozeti', 1);
-  }
-  
-  // Öncelik bazlı başarılar
-  if (completedTask.priority === 'urgent') {
-    const urgentCount = x.tasks.getAllTasks()
-      .filter(t => t.completed && t.priority === 'urgent').length;
-    
-    if (urgentCount === 10) {
-      x.achievements.unlock('acil_durum_uzmanı', '10 acil görev tamamladın!');
-      x.inventory.addItem('acil_madalyası', 1);
-    }
-  }
-  
-  // Toplam görev sayısı milestones
-  const totalCompleted = x.tasks.getAllTasks().filter(t => t.completed).length;
-  
-  if ([10, 50, 100, 250, 500, 1000].includes(totalCompleted)) {
-    x.achievements.unlock(\`gorev_master_\${totalCompleted}\`, \`\${totalCompleted} görev tamamladın!\`);
-    x.inventory.addItem('başarı_puanı', totalCompleted / 10);
-    x.ui.notify(\`🏆 \${totalCompleted} Görev Master! +\${totalCompleted/10} başarı puanı!\`);
-  }
-}`
-    },
-    {
-      name: "Smart Reward System",
-      description: "Akıllı ödül ve bonus sistemi",
-      code: `// Event tipine göre ödüller
-switch(context.event) {
-  case 'onTaskComplete':
-    // Zaman bazlı bonuslar
-    const hour = new Date().getHours();
-    if (hour >= 5 && hour <= 9) {
-      x.inventory.addItem('erken_kuş_bonusu', 2);
-      x.ui.notify('🌅 Erken Kuş Bonusu! +2 bonus');
-    }
-    
-    // Streak hesapla
-    const today = x.utils.getCurrentDate();
-    const streak = x.utils.calculateStreak(x.tasks.getAllTasks().filter(t => t.completed), 1);
-    
-    if (streak >= 5) {
-      x.inventory.addItem('günlük_streak', streak);
-      x.ui.notify(\`🔥 \${streak} günlük streak! +\${streak} streak bonusu\`);
-    }
-    break;
-    
-  case 'onRewardUse':
-    const reward = context.eventData.reward;
-    x.ui.notify(\`🎁 \${reward.name} ödülü kullanıldı!\`);
-    
-    // Ödül kullanım istatistikleri
-    x.logs.addLog({
-      name: 'Ödül Kullanımı',
-      description: \`\${reward.name} ödülü kullanıldı\`,
-      points: { ödül_kullanımı: 1 }
-    });
-    break;
-    
-  case 'onInventoryAdd':
-    // Envanter doluluğuna göre uyarılar
-    const totalItems = x.inventory.getAllItems()
-      .reduce((sum, item) => sum + item.amount, 0);
-      
-    if (totalItems >= 1000) {
-      x.ui.notify('⚠️ Envanteriniz doluyor! Eşyaları kullanmayı düşünün.');
-    }
-    break;
-}`
-    },
-    {
-      name: "Productivity Analytics",
-      description: "Verimlilik analizi ve öneriler",
-      code: `// Sadece görev completion eventlerinde
-if (context.event === 'onTaskComplete') {
-  const allTasks = x.tasks.getAllTasks().filter(t => t.completed);
-  const last7Days = x.utils.getDaysAgo(7);
-  const recentTasks = allTasks.filter(t => new Date(t.completedAt) > last7Days);
-  
-  // Haftalık analiz
-  const weeklyStats = {
-    total: recentTasks.length,
-    categories: {},
-    priorities: {},
-    avgPerDay: recentTasks.length / 7
-  };
-  
-  recentTasks.forEach(t => {
-    weeklyStats.categories[t.category] = (weeklyStats.categories[t.category] || 0) + 1;
-    weeklyStats.priorities[t.priority] = (weeklyStats.priorities[t.priority] || 0) + 1;
-  });
-  
-  // En verimli kategori
-  const topCategory = Object.entries(weeklyStats.categories)
-    .sort(([,a], [,b]) => b - a)[0];
-    
-  if (topCategory && topCategory[1] >= 5) {
-    x.ui.notify(\`📊 Bu hafta en verimli olduğunuz kategori: \${topCategory[0]} (\${topCategory[1]} görev)\`);
-    x.inventory.addItem(\`\${topCategory[0]}_uzmanı\`, 1);
-  }
-  
-  // Verimlilik önerileri
-  if (weeklyStats.avgPerDay < 1) {
-    x.ui.notify('💡 Öneri: Günde en az 1 görev tamamlamaya çalışın!');
-  } else if (weeklyStats.avgPerDay >= 5) {
-    x.ui.notify('🚀 Harika! Süper verimli bir haftanız var!');
-    x.inventory.addItem('verimlilik_madalyası', 1);
-  }
-  
-  // Her 7. görevde analiz raporu
-  if (recentTasks.length % 7 === 0) {
-    x.ui.log('📈 Haftalık Rapor: ' + JSON.stringify(weeklyStats, null, 2));
-  }
-}`
-    },
-    {
-      name: "Dynamic Challenge Creator",
-      description: "Dinamik görev oluşturucu ve meydan okumalar",
-      code: `// Belirli eventlerde yeni görevler öner
-if (context.event === 'onTaskComplete') {
-  const completedTask = task;
-  const random = x.utils.getRandomInt(1, 100);
-  
-  // %20 şansla challenge öner
-  if (random <= 20) {
-    const challenges = [
-      { name: 'Çifte Tempo', desc: 'Bugün 2 görev daha tamamla', reward: 'tempo_bonusu' },
-      { name: 'Kategori Kral', desc: \`\${completedTask.category} kategorisinde 3 görev daha\`, reward: 'kategori_uzmanı' },
-      { name: 'Yüksek Öncelik', desc: 'Bir yüksek öncelikli görev tamamla', reward: 'öncelik_madalyası' },
-      { name: 'Erken Kuş', desc: 'Yarın sabah 9 öncesi bir görev tamamla', reward: 'erken_bonusu' }
-    ];
-    
-    const challenge = x.utils.getRandomChoice(challenges);
-    
-    x.ui.notify(\`🎯 Yeni Meydan Okuma: \${challenge.name}\\n\${challenge.desc}\\nÖdül: \${challenge.reward}\`);
-    
-    // Challenge'ı log olarak kaydet
-    x.logs.addLog({
-      name: 'Meydan Okuma',
-      description: \`\${challenge.name}: \${challenge.desc}\`,
-      points: { challenge: 1 }
-    });
-  }
-}
-
-// Inventory eventlerinde koleksiyon önerileri
-if (context.event === 'onInventoryAdd') {
-  const itemName = context.eventData.itemName;
-  const collections = {
-    'altın': ['gümüş', 'bronz', 'elmas'],
-    'elmas': ['safir', 'yakut', 'zümrüt'],
-    'kitap': ['kalem', 'defter', 'silgi']
-  };
-  
-  if (collections[itemName]) {
-    const suggestion = x.utils.getRandomChoice(collections[itemName]);
-    x.ui.notify(\`� Koleksiyon Önerisi: \${suggestion} toplamayı deneyin!\`);
-  }
-}`
-    }
-  ]
-
   // Yeni script oluştur
   const createNewScript = () => {
     setActiveScript(null)
@@ -619,7 +423,7 @@ if (context.event === 'onInventoryAdd') {
             <div class="bg-gray-50 rounded-lg p-8 text-center text-gray-500">
               <div class="text-4xl mb-4">✨</div>
               <p class="text-lg">Script seçin veya yeni oluşturun</p>
-              <p class="text-sm mt-2">Sol taraftan bir script seçerek düzenlemeye başlayın</p>
+              <p class="text-sm mt-2">Sol taraftan bir script seçarak düzenlemeye başlayın</p>
             </div>
           }>
             <div class="bg-white rounded-lg shadow-md p-6">
@@ -710,23 +514,11 @@ if (context.event === 'onInventoryAdd') {
                     <p><code class="bg-white px-1 rounded">x.achievements.unlock(name, desc)</code> - Başarı aç</p>
                     <p><code class="bg-white px-1 rounded">x.achievements.isUnlocked(name)</code> - Başarı kontrolü</p>
                     
-                    <div class="font-semibold text-gray-700 mt-2">� Rewards:</div>
+                    <div class="font-semibold text-gray-700 mt-2">🎁 Rewards:</div>
                     <p><code class="bg-white px-1 rounded">x.rewards.useReward(id, context)</code> - Ödül kullan</p>
                     <p><code class="bg-white px-1 rounded">x.rewards.addReward(data)</code> - Yeni ödül</p>
                     
-                    <div class="font-semibold text-gray-700 mt-2">📊 Logs:</div>
-                    <p><code class="bg-white px-1 rounded">x.logs.addLog(data)</code> - Log ekle</p>
-                    <p><code class="bg-white px-1 rounded">x.logs.getAllLogs()</code> - Tüm loglar</p>
-                    
-                    <div class="font-semibold text-gray-700 mt-2">⭐ Prestige:</div>
-                    <p><code class="bg-white px-1 rounded">x.prestige.addPoints(points)</code> - Prestij ekle</p>
-                    <p><code class="bg-white px-1 rounded">x.prestige.getLevel()</code> - Prestij seviyesi</p>
-                    
-                    <div class="font-semibold text-gray-700 mt-2">🎨 UI:</div>
-                    <p><code class="bg-white px-1 rounded">x.ui.notify(message)</code> - Bildirim göster</p>
-                    <p><code class="bg-white px-1 rounded">x.ui.log(message)</code> - Console log</p>
-                    
-                    <div class="font-semibold text-gray-700 mt-2">�️ Utils:</div>
+                    <div class="font-semibold text-gray-700 mt-2">🛠️ Utils:</div>
                     <p><code class="bg-white px-1 rounded">x.utils.getRandomInt(min, max)</code> - Rastgele sayı</p>
                     <p><code class="bg-white px-1 rounded">x.utils.getRandomChoice(array)</code> - Rastgele seçim</p>
                     <p><code class="bg-white px-1 rounded">x.utils.calculateStreak(tasks, days)</code> - Streak hesapla</p>

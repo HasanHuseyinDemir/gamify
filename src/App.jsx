@@ -483,6 +483,27 @@ function App() {
     setActions(a => { const na = a.filter(x => x.id !== id); save('actions', na); return na })
   }
 
+  // Elle log ekleme
+  const addAction = (actionData) => {
+    try {
+      const pointsObj = validatePoints(actionData.points)
+      
+      const logEntry = {
+        id: Date.now(),
+        name: actionData.name,
+        description: actionData.description || '',
+        date: new Date().toISOString(),
+        points: pointsObj,
+        manuallyAdded: true // Elle eklendiğini belirtmek için
+      }
+      
+      setActions(a => { const na = [...a, logEntry]; save('actions', na); return na })
+      return logEntry
+    } catch (error) {
+      throw new Error(`Puan formatı hatalı: ${error.message}`)
+    }
+  }
+
   // Log düzenleme başlat
   const startEdit = (action) => {
     setEditId(action.id)
@@ -1190,137 +1211,105 @@ function App() {
 
   return (
     <div class="min-h-screen bg-gradient-to-br from-blue-50 to-purple-100">
-      <div class="flex h-screen">
-        {/* Desktop Sidebar */}
-        <div class="hidden lg:flex flex-col w-64 bg-white shadow-lg border-r border-gray-200">
-          <div class="p-6 border-b border-gray-200">
-            <h1 class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-600">
-              🎮 Gamify
-            </h1>
-          </div>
-          <nav class="flex-1 p-4 space-y-2">
-            <button 
-              class={`w-full flex items-center px-4 py-3 rounded-lg font-semibold text-sm transition-all ${
-                tab()==='todos' ? 'bg-green-600 text-white shadow-md' : 'text-green-700 hover:bg-green-50'
-              }`} 
-              onClick={()=>setTab('todos')}
-            >
-              <span class="mr-3">✅</span>
-              Görevler
-            </button>
-            <button 
-              class={`w-full flex items-center px-4 py-3 rounded-lg font-semibold text-sm transition-all ${
-                tab()==='log' ? 'bg-blue-600 text-white shadow-md' : 'text-blue-700 hover:bg-blue-50'
-              }`} 
-              onClick={()=>setTab('log')}
-            >
-              <span class="mr-3">📋</span>
-              Loglar
-            </button>
-            <button 
-              class={`w-full flex items-center px-4 py-3 rounded-lg font-semibold text-sm transition-all ${
-                tab()==='analiz' ? 'bg-purple-600 text-white shadow-md' : 'text-purple-700 hover:bg-purple-50'
-              }`} 
-              onClick={()=>setTab('analiz')}
-            >
-              <span class="mr-3">📊</span>
-              Analiz
-            </button>
-            <button 
-              class={`w-full flex items-center px-4 py-3 rounded-lg font-semibold text-sm transition-all ${
-                tab()==='envanter' ? 'bg-green-600 text-white shadow-md' : 'text-green-700 hover:bg-green-50'
-              }`} 
-              onClick={()=>setTab('envanter')}
-            >
-              <span class="mr-3">📦</span>
-              Envanter
-            </button>
-            <button 
-              class={`w-full flex items-center px-4 py-3 rounded-lg font-semibold text-sm transition-all ${
-                tab()==='odul' ? 'bg-yellow-500 text-white shadow-md' : 'text-yellow-700 hover:bg-yellow-50'
-              }`} 
-              onClick={()=>setTab('odul')}
-            >
-              <span class="mr-3">🎁</span>
-              Ödüller
-            </button>
-            <button 
-              class={`w-full flex items-center px-4 py-3 rounded-lg font-semibold text-sm transition-all ${
-                tab()==='basari' ? 'bg-orange-500 text-white shadow-md' : 'text-orange-700 hover:bg-orange-50'
-              }`} 
-              onClick={()=>setTab('basari')}
-            >
-              <span class="mr-3">🏆</span>
-              Başarılar
-            </button>
-            <button 
-              class={`w-full flex items-center px-4 py-3 rounded-lg font-semibold text-sm transition-all ${
-                tab()==='tekrarli' ? 'bg-pink-500 text-white shadow-md' : 'text-pink-700 hover:bg-pink-50'
-              }`} 
-              onClick={()=>setTab('tekrarli')}
-            >
-              <span class="mr-3">🔄</span>
-              Tekrarlı
-            </button>
-            <button 
-              class={`w-full flex items-center px-4 py-3 rounded-lg font-semibold text-sm transition-all ${
-                tab()==='scripts' ? 'bg-purple-700 text-white shadow-md' : 'text-purple-700 hover:bg-purple-50'
-              }`} 
-              onClick={()=>setTab('scripts')}
-            >
-              <span class="mr-3">🚀</span>
-              Scriptler
-            </button>
-            <button 
-              class={`w-full flex items-center px-4 py-3 rounded-lg font-semibold text-sm transition-all ${
-                tab()==='ayarlar' ? 'bg-gray-700 text-white shadow-md' : 'text-gray-700 hover:bg-gray-50'
-              }`} 
-              onClick={()=>setTab('ayarlar')}
-            >
-              <span class="mr-3">⚙️</span>
-              Ayarlar
-            </button>
-          </nav>
-        </div>
-
-        {/* Main Content */}
-        <div class="flex-1 flex flex-col overflow-hidden">
-          {/* Mobile Tab Bar */}
-          <div class="lg:hidden bg-white/80 backdrop-blur-sm shadow-lg border-b border-gray-200 p-2 sticky top-0 z-10">
-            <div class="flex overflow-x-auto scrollbar-hide gap-1 sm:gap-2 pb-1">
-              <button class={`px-2 sm:px-4 py-2 rounded-lg font-semibold text-xs sm:text-sm whitespace-nowrap transition-all ${tab()==='todos' ? 'bg-green-600 text-white shadow-md' : 'bg-white text-green-600 hover:bg-green-50'}`} onClick={()=>setTab('todos')}>
-                ✅ <span class="hidden sm:inline">Görevler</span>
-              </button>
-              <button class={`px-2 sm:px-4 py-2 rounded-lg font-semibold text-xs sm:text-sm whitespace-nowrap transition-all ${tab()==='log' ? 'bg-blue-600 text-white shadow-md' : 'bg-white text-blue-600 hover:bg-blue-50'}`} onClick={()=>setTab('log')}>
-                📋 <span class="hidden sm:inline">Loglar</span>
-              </button>
-              <button class={`px-2 sm:px-4 py-2 rounded-lg font-semibold text-xs sm:text-sm whitespace-nowrap transition-all ${tab()==='analiz' ? 'bg-purple-600 text-white shadow-md' : 'bg-white text-purple-600 hover:bg-purple-50'}`} onClick={()=>setTab('analiz')}>
-                📊 <span class="hidden sm:inline">Analiz</span>
-              </button>
-              <button class={`px-2 sm:px-4 py-2 rounded-lg font-semibold text-xs sm:text-sm whitespace-nowrap transition-all ${tab()==='envanter' ? 'bg-green-600 text-white shadow-md' : 'bg-white text-green-700 hover:bg-green-50'}`} onClick={()=>setTab('envanter')}>
-                📦 <span class="hidden sm:inline">Envanter</span>
-              </button>
-              <button class={`px-2 sm:px-4 py-2 rounded-lg font-semibold text-xs sm:text-sm whitespace-nowrap transition-all ${tab()==='odul' ? 'bg-yellow-500 text-white shadow-md' : 'bg-white text-yellow-700 hover:bg-yellow-50'}`} onClick={()=>setTab('odul')}>
-                🎁 <span class="hidden sm:inline">Ödüller</span>
-              </button>
-              <button class={`px-2 sm:px-4 py-2 rounded-lg font-semibold text-xs sm:text-sm whitespace-nowrap transition-all ${tab()==='basari' ? 'bg-orange-500 text-white shadow-md' : 'bg-white text-orange-700 hover:bg-orange-50'}`} onClick={()=>setTab('basari')}>
-                🏆 <span class="hidden sm:inline">Başarılar</span>
-              </button>
-              <button class={`px-2 sm:px-4 py-2 rounded-lg font-semibold text-xs sm:text-sm whitespace-nowrap transition-all ${tab()==='tekrarli' ? 'bg-pink-500 text-white shadow-md' : 'bg-white text-pink-700 hover:bg-pink-50'}`} onClick={()=>setTab('tekrarli')}>
-                🔄 <span class="hidden sm:inline">Tekrarlı</span>
-              </button>
-              <button class={`px-2 sm:px-4 py-2 rounded-lg font-semibold text-xs sm:text-sm whitespace-nowrap transition-all ${tab()==='scripts' ? 'bg-purple-700 text-white shadow-md' : 'bg-white text-purple-700 hover:bg-purple-50'}`} onClick={()=>setTab('scripts')}>
-                🚀 <span class="hidden sm:inline">Scriptler</span>
-              </button>
-              <button class={`px-2 sm:px-4 py-2 rounded-lg font-semibold text-xs sm:text-sm whitespace-nowrap transition-all ${tab()==='ayarlar' ? 'bg-gray-700 text-white shadow-md' : 'bg-white text-gray-700 hover:bg-gray-50'}`} onClick={()=>setTab('ayarlar')}>
-                ⚙️ <span class="hidden sm:inline">Ayarlar</span>
-              </button>
+      {/* Header with Logo and Navigation */}
+      <div class="bg-white shadow-lg border-b border-gray-200 sticky top-0 z-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="flex items-center justify-between h-16">
+            {/* Logo */}
+            <div class="flex items-center">
+              <h1 class="text-xl sm:text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-blue-600">
+                🎮 Gamify
+              </h1>
             </div>
+            
+            {/* Navigation Tabs */}
+            <nav class="flex space-x-1 sm:space-x-2 overflow-x-auto max-w-full">
+              <button 
+                class={`px-3 py-2 rounded-lg font-semibold text-xs sm:text-sm whitespace-nowrap transition-all ${
+                  tab()==='todos' ? 'bg-green-600 text-white shadow-md' : 'text-green-700 hover:bg-green-50'
+                }`} 
+                onClick={()=>setTab('todos')}
+              >
+                <span class="mr-1 sm:mr-2">✅</span>
+                <span class="hidden sm:inline">Görevler</span>
+              </button>
+              <button 
+                class={`px-3 py-2 rounded-lg font-semibold text-xs sm:text-sm whitespace-nowrap transition-all ${
+                  tab()==='log' ? 'bg-blue-600 text-white shadow-md' : 'text-blue-700 hover:bg-blue-50'
+                }`} 
+                onClick={()=>setTab('log')}
+              >
+                <span class="mr-1 sm:mr-2">📋</span>
+                <span class="hidden sm:inline">Loglar</span>
+              </button>
+              <button 
+                class={`px-3 py-2 rounded-lg font-semibold text-xs sm:text-sm whitespace-nowrap transition-all ${
+                  tab()==='analiz' ? 'bg-purple-600 text-white shadow-md' : 'text-purple-700 hover:bg-purple-50'
+                }`} 
+                onClick={()=>setTab('analiz')}
+              >
+                <span class="mr-1 sm:mr-2">📊</span>
+                <span class="hidden sm:inline">Analiz</span>
+              </button>
+              <button 
+                class={`px-3 py-2 rounded-lg font-semibold text-xs sm:text-sm whitespace-nowrap transition-all ${
+                  tab()==='envanter' ? 'bg-green-600 text-white shadow-md' : 'text-green-700 hover:bg-green-50'
+                }`} 
+                onClick={()=>setTab('envanter')}
+              >
+                <span class="mr-1 sm:mr-2">📦</span>
+                <span class="hidden sm:inline">Envanter</span>
+              </button>
+              <button 
+                class={`px-3 py-2 rounded-lg font-semibold text-xs sm:text-sm whitespace-nowrap transition-all ${
+                  tab()==='odul' ? 'bg-yellow-500 text-white shadow-md' : 'text-yellow-700 hover:bg-yellow-50'
+                }`} 
+                onClick={()=>setTab('odul')}
+              >
+                <span class="mr-1 sm:mr-2">🎁</span>
+                <span class="hidden sm:inline">Ödüller</span>
+              </button>
+              <button 
+                class={`px-3 py-2 rounded-lg font-semibold text-xs sm:text-sm whitespace-nowrap transition-all ${
+                  tab()==='basari' ? 'bg-orange-500 text-white shadow-md' : 'text-orange-700 hover:bg-orange-50'
+                }`} 
+                onClick={()=>setTab('basari')}
+              >
+                <span class="mr-1 sm:mr-2">🏆</span>
+                <span class="hidden sm:inline">Başarılar</span>
+              </button>
+              <button 
+                class={`px-3 py-2 rounded-lg font-semibold text-xs sm:text-sm whitespace-nowrap transition-all ${
+                  tab()==='tekrarli' ? 'bg-pink-500 text-white shadow-md' : 'text-pink-700 hover:bg-pink-50'
+                }`} 
+                onClick={()=>setTab('tekrarli')}
+              >
+                <span class="mr-1 sm:mr-2">🔄</span>
+                <span class="hidden sm:inline">Tekrarlı</span>
+              </button>
+              <button 
+                class={`px-3 py-2 rounded-lg font-semibold text-xs sm:text-sm whitespace-nowrap transition-all ${
+                  tab()==='scripts' ? 'bg-purple-700 text-white shadow-md' : 'text-purple-700 hover:bg-purple-50'
+                }`} 
+                onClick={()=>setTab('scripts')}
+              >
+                <span class="mr-1 sm:mr-2">🚀</span>
+                <span class="hidden sm:inline">Scriptler</span>
+              </button>
+              <button 
+                class={`px-3 py-2 rounded-lg font-semibold text-xs sm:text-sm whitespace-nowrap transition-all ${
+                  tab()==='ayarlar' ? 'bg-gray-700 text-white shadow-md' : 'text-gray-700 hover:bg-gray-50'
+                }`} 
+                onClick={()=>setTab('ayarlar')}
+              >
+                <span class="mr-1 sm:mr-2">⚙️</span>
+                <span class="hidden sm:inline">Ayarlar</span>
+              </button>
+            </nav>
           </div>
+        </div>
+      </div>
 
-          {/* Content Area */}
-          <div class="flex-1 overflow-auto">
-            <div class="p-4 lg:p-6">
         <Show when={tab()==='todos'}>
           <TodoTab 
             // Todo özel state ve fonksiyonları
@@ -1339,7 +1328,7 @@ function App() {
         </Show>
         <Show when={tab()==='log'}>
           <LogTab 
-            actions={actions} deleteAction={deleteAction}
+            actions={actions} deleteAction={deleteAction} addAction={addAction}
             editId={editId} setEditId={setEditId}
             editName={editName} setEditName={setEditName}
             editDescription={editDescription} setEditDescription={setEditDescription}
@@ -1395,6 +1384,11 @@ function App() {
             addAchievement={addAchievement} addAchievementFromModal={addAchievementFromModal}
             updateAchievement={updateAchievement} 
             filteredAchievementsList={filteredAchievementsList}
+            editAchievementId={editAchievementId} setEditAchievementId={setEditAchievementId}
+            editAchievementName={editAchievementName} setEditAchievementName={setEditAchievementName}
+            editAchievementDesc={editAchievementDesc} setEditAchievementDesc={setEditAchievementDesc}
+            editAchievementCriteria={editAchievementCriteria} setEditAchievementCriteria={setEditAchievementCriteria}
+            editAchievementPrestige={editAchievementPrestige} setEditAchievementPrestige={setEditAchievementPrestige}
             deleteAchievement={deleteAchievement} getUserPoints={getUserPoints}
             prestigeSettings={prestigeSettings}
           />
@@ -1427,59 +1421,56 @@ function App() {
             getPrestigeLevel={getPrestigeLevel}
           />
         </Show>
-            </div>
-          </div>
-          
-          {/* Global Stats - Bottom Section */}
-          <div class="bg-white border-t border-gray-200 p-4 lg:p-6">
-            <div class="max-w-7xl mx-auto">
-              <h3 class="text-lg font-bold text-gray-800 mb-4">📊 Genel İstatistikler</h3>
-              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-4 border border-blue-200">
-                  <div class="flex items-center">
-                    <div class="p-2 bg-blue-500 rounded-lg mr-3">
-                      <span class="text-xl">📋</span>
-                    </div>
-                    <div>
-                      <p class="text-sm text-gray-600">Toplam Eylem</p>
-                      <p class="text-xl font-bold text-blue-600">{actions().length}</p>
-                    </div>
+        
+        {/* Global Stats - Bottom Section */}
+        <div class="bg-white border-t border-gray-200 p-4 lg:p-6 mt-8">
+          <div class="max-w-7xl mx-auto">
+            <h3 class="text-lg font-bold text-gray-800 mb-4">📊 Genel İstatistikler</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div class="bg-gradient-to-br from-blue-50 to-purple-50 rounded-xl p-4 border border-blue-200">
+                <div class="flex items-center">
+                  <div class="p-2 bg-blue-500 rounded-lg mr-3">
+                    <span class="text-xl">📋</span>
+                  </div>
+                  <div>
+                    <p class="text-sm text-gray-600">Toplam Eylem</p>
+                    <p class="text-xl font-bold text-blue-600">{actions().length}</p>
                   </div>
                 </div>
-                
-                <div class="bg-gradient-to-br from-green-50 to-blue-50 rounded-xl p-4 border border-green-200">
-                  <div class="flex items-center">
-                    <div class="p-2 bg-green-500 rounded-lg mr-3">
-                      <span class="text-xl">✅</span>
-                    </div>
-                    <div>
-                      <p class="text-sm text-gray-600">Tamamlanan Görev</p>
-                      <p class="text-xl font-bold text-green-600">{todos().filter(t => t.completed).length}</p>
-                    </div>
+              </div>
+              
+              <div class="bg-gradient-to-br from-green-50 to-blue-50 rounded-xl p-4 border border-green-200">
+                <div class="flex items-center">
+                  <div class="p-2 bg-green-500 rounded-lg mr-3">
+                    <span class="text-xl">✅</span>
+                  </div>
+                  <div>
+                    <p class="text-sm text-gray-600">Tamamlanan Görev</p>
+                    <p class="text-xl font-bold text-green-600">{todos().filter(t => t.completed).length}</p>
                   </div>
                 </div>
+              </div>
 
-                <div class="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-xl p-4 border border-yellow-200">
-                  <div class="flex items-center">
-                    <div class="p-2 bg-yellow-500 rounded-lg mr-3">
-                      <span class="text-xl">🎯</span>
-                    </div>
-                    <div>
-                      <p class="text-sm text-gray-600">Toplam Puan</p>
-                      <p class="text-xl font-bold text-yellow-600">{getUserPoints()}</p>
-                    </div>
+              <div class="bg-gradient-to-br from-yellow-50 to-orange-50 rounded-xl p-4 border border-yellow-200">
+                <div class="flex items-center">
+                  <div class="p-2 bg-yellow-500 rounded-lg mr-3">
+                    <span class="text-xl">🎯</span>
+                  </div>
+                  <div>
+                    <p class="text-sm text-gray-600">Toplam Puan</p>
+                    <p class="text-xl font-bold text-yellow-600">{getUserPoints()}</p>
                   </div>
                 </div>
+              </div>
 
-                <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-4 border border-purple-200">
-                  <div class="flex items-center">
-                    <div class="p-2 bg-purple-500 rounded-lg mr-3">
-                      <span class="text-xl">🏆</span>
-                    </div>
-                    <div>
-                      <p class="text-sm text-gray-600">Prestij Seviyesi</p>
-                      <p class="text-xl font-bold text-purple-600">{getPrestigeLevel()}</p>
-                    </div>
+              <div class="bg-gradient-to-br from-purple-50 to-pink-50 rounded-xl p-4 border border-purple-200">
+                <div class="flex items-center">
+                  <div class="p-2 bg-purple-500 rounded-lg mr-3">
+                    <span class="text-xl">🏆</span>
+                  </div>
+                  <div>
+                    <p class="text-sm text-gray-600">Prestij Seviyesi</p>
+                    <p class="text-xl font-bold text-purple-600">{getPrestigeLevel()}</p>
                   </div>
                 </div>
               </div>
@@ -1487,9 +1478,8 @@ function App() {
           </div>
         </div>
       </div>
-    </div>
+    
   )
-}
 }
 
 export default App
